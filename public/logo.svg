@@ -1,0 +1,39 @@
+<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0f766e"/>
+      <stop offset="55%" stop-color="#155e75"/>
+      <stop offset="100%" stop-color="#0c1e3e"/>
+    </linearGradient>
+    <linearGradient id="swooshGradient" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.15"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0.55"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background rounded square -->
+  <rect x="0" y="0" width="512" height="512" rx="120" fill="url(#bgGradient)"/>
+
+  <!-- Abstract flowing swoosh -->
+  <path d="M 90 330 C 160 380, 240 380, 300 300 C 350 235, 400 220, 430 250"
+        fill="none" stroke="url(#swooshGradient)" stroke-width="22" stroke-linecap="round"/>
+
+  <!-- Small dot at the end of the swoosh -->
+  <circle cx="430" cy="250" r="14" fill="#ffffff"/>
+
+  <!-- Main sparkle (4-point star) -->
+  <path d="M 210 150
+           C 214 190, 230 206, 270 210
+           C 230 214, 214 230, 210 270
+           C 206 230, 190 214, 150 210
+           C 190 206, 206 190, 210 150 Z"
+        fill="#ffffff"/>
+
+  <!-- Small secondary sparkle -->
+  <path d="M 320 190
+           C 322 208, 330 216, 348 218
+           C 330 220, 322 228, 320 246
+           C 318 228, 310 220, 292 218
+           C 310 216, 318 208, 320 190 Z"
+        fill="#ffffff" opacity="0.85"/>
+</svg>
