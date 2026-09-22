@@ -2,9 +2,9 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import {
-    Trash2,
-    Send,
-    FileText,
+  Trash2,
+  Send,
+  FileText,
 } from "lucide-react";
 
 import api from "../services/api";
@@ -12,177 +12,361 @@ import api from "../services/api";
 import DashboardNavbar from "../components/DashboardNavbar";
 import Footer from "../components/Footer";
 
+
 function Draft() {
 
-    const navigate = useNavigate();
+  const navigate = useNavigate();
 
-    const [drafts, setDrafts] = useState([]);
+  const [drafts, setDrafts] = useState([]);
 
-    const [loading, setLoading] = useState(true);
-    const loadDrafts = async () => {
+  const [loading, setLoading] =
+    useState(true);
 
-        try {
 
-            const response = await api.get("/blogs");
+  // ================= LOAD DRAFTS =================
 
-            const draftBlogs = response.data.filter(
-                (blog) => blog.status === "draft"
-            );
+  const loadDrafts = async () => {
+  try {
+    setLoading(true);
 
-            setDrafts(draftBlogs.reverse());
+    const response = await api.get("/blogs");
 
-        } catch (error) {
+    // Backend returns:
+    // response.data.blogs
 
-            console.log(error);
+    const blogsData = response.data.blogs || [];
 
-        } finally {
+    // Only draft blogs
+    const draftBlogs = blogsData.filter(
+      (blog) => blog.status === "draft"
+    );
 
-            setLoading(false);
+    // Latest draft first
+    setDrafts([...draftBlogs].reverse());
 
-        }
+  } catch (error) {
+    console.log("Load Drafts Error:", error);
 
-    };
-    useEffect(() => {
+    if (error.response) {
+      console.log(error.response.data);
+    }
 
-        loadDrafts();
+  } finally {
+    setLoading(false);
+  }
+};
 
-    }, []);
-    const handleDelete = async (id) => {
 
-        const ok = window.confirm(
-            "Delete this draft?"
+  // ================= PAGE LOAD =================
+
+  useEffect(() => {
+
+    loadDrafts();
+
+  }, []);
+
+
+  // ================= DELETE DRAFT =================
+
+  const handleDelete = async (id) => {
+
+    const ok = window.confirm(
+      "Delete this draft?"
+    );
+
+    if (!ok) return;
+
+
+    try {
+
+      await api.delete(
+        `/blogs/${id}`
+      );
+
+
+      alert("Draft Deleted");
+
+
+      loadDrafts();
+
+    } catch (error) {
+
+      console.log(error);
+
+
+      if (error.response) {
+
+        alert(
+          error.response.data.message ||
+          "Failed to delete draft"
         );
 
-        if (!ok) return;
+      } else {
 
-        try {
+        alert(
+          "Unable to connect to server"
+        );
 
-            await api.delete(`/blogs/${id}`);
+      }
 
-            loadDrafts();
+    }
+  };
 
-        } catch (error) {
 
-            console.log(error);
+  // ================= PUBLISH DRAFT =================
 
-        }
+  const handlePublish = async (draft) => {
 
-    };
+    try {
 
-    const handlePublish = async (draft) => {
-        try {
+      const updatedBlog = {
 
-            await api.put(`/blogs/${draft.id}`, {
-                ...draft,
-                status: "published",
-            });
+        title: draft.title,
 
-            alert("Published Successfully");
+        content: draft.content,
 
-            loadDrafts();
+        summary: draft.summary,
 
-            navigate("/dashboard");
+        tags: draft.tags,
 
-        } catch (error) {
+        image: draft.image,
 
-            console.log(error);
+        author: draft.author,
 
-        }
-    };
-    return (
-  <div className="min-h-screen bg-gray-100">
+        userId: draft.userId,
 
-    <DashboardNavbar />
+        createdAt: draft.createdAt,
 
-    <main className="max-w-7xl mx-auto py-10 px-5">
+        status: "published",
 
-      <h1 className="text-4xl font-bold">
-        Draft Blogs
-      </h1>
+      };
 
-      <p className="text-gray-500 mt-2">
-        Your saved drafts
-      </p>
 
-      {loading ? (
+      await api.patch(
+        `/blogs/${draft._id}`,
+        updatedBlog
+      );
 
-        <h2 className="text-center mt-10">
-          Loading...
-        </h2>
 
-      ) : drafts.length === 0 ? (
+      alert(
+        "Published Successfully"
+      );
 
-        <div className="bg-white rounded-xl shadow p-10 text-center mt-10">
 
-          <FileText size={60} className="mx-auto text-gray-400" />
+      loadDrafts();
 
-          <h2 className="text-2xl font-bold mt-4">
-            No Drafts Found
+
+      navigate("/dashboard");
+
+    } catch (error) {
+
+      console.log(error);
+
+
+      if (error.response) {
+
+        alert(
+          error.response.data.message ||
+          "Failed to publish draft"
+        );
+
+      } else {
+
+        alert(
+          "Unable to connect to server"
+        );
+
+      }
+
+    }
+  };
+
+
+  return (
+
+    <div className="min-h-screen bg-gray-100">
+
+
+      <DashboardNavbar />
+
+
+      <main className="max-w-7xl mx-auto py-10 px-5">
+
+
+        {/* HEADER */}
+
+        <h1 className="text-4xl font-bold">
+          Draft Blogs
+        </h1>
+
+
+        <p className="text-gray-500 mt-2">
+          Your saved drafts
+        </p>
+
+
+        {/* ================= LOADING ================= */}
+
+        {loading ? (
+
+          <h2 className="text-center mt-10 text-xl font-semibold">
+            Loading...
           </h2>
 
-        </div>
 
-      ) : (
+        ) : drafts.length === 0 ? (
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mt-10">
 
-          {drafts.map((draft) => (
+          /* ================= NO DRAFTS ================= */
 
-            <div
-              key={draft.id}
-              className="bg-white rounded-xl shadow overflow-hidden"
+          <div className="bg-white rounded-xl shadow p-10 text-center mt-10">
+
+            <FileText
+              size={60}
+              className="mx-auto text-gray-400"
+            />
+
+
+            <h2 className="text-2xl font-bold mt-4">
+              No Drafts Found
+            </h2>
+
+
+            <p className="text-gray-500 mt-2">
+              Save an article as draft to see it here.
+            </p>
+
+
+            <button
+              onClick={() =>
+                navigate("/create-blog")
+              }
+              className="mt-6 bg-sky-900 text-white px-6 py-3 rounded-lg hover:bg-sky-800"
             >
+              Create New Blog
+            </button>
 
-              <img
-                src={draft.image}
-                alt={draft.title}
-                className="w-full h-52 object-cover"
-              />
+          </div>
 
-              <div className="p-5">
 
-                <h2 className="text-2xl font-bold">
-                  {draft.title}
-                </h2>
+        ) : (
 
-                <p className="mt-3 line-clamp-4">
-                  {draft.summary}
-                </p>
 
-                <div className="flex gap-3 mt-6">
+          /* ================= DRAFT CARDS ================= */
 
-                  <button
-                    onClick={() => handlePublish(draft)}
-                    className="flex-1 bg-green-600 text-white py-2 rounded-lg flex justify-center items-center gap-2"
-                  >
-                    <Send size={18}/>
-                    Publish
-                  </button>
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mt-10">
 
-                  <button
-                    onClick={() => handleDelete(draft.id)}
-                    className="bg-red-600 text-white p-3 rounded-lg"
-                  >
-                    <Trash2 size={18}/>
-                  </button>
+
+            {drafts.map((draft) => (
+
+              <div
+                key={draft._id}
+                className="bg-white rounded-xl shadow overflow-hidden"
+              >
+
+
+                {/* IMAGE */}
+
+                <img
+                  src={
+                    draft.image ||
+                    "https://picsum.photos/800/400"
+                  }
+                  alt={draft.title}
+                  className="w-full h-52 object-cover"
+                  onError={(e) => {
+                    e.target.src =
+                      "https://picsum.photos/800/400";
+                  }}
+                />
+
+
+                {/* CONTENT */}
+
+                <div className="p-5">
+
+
+                  <span className="inline-block bg-sky-100 text-sky-700 px-3 py-1 rounded-full text-sm">
+                    Draft
+                  </span>
+
+
+                  <h2 className="text-2xl font-bold mt-3">
+                    {draft.title ||
+                      "Untitled Draft"}
+                  </h2>
+
+
+                  <p className="mt-3 text-gray-600 line-clamp-4">
+                    {draft.summary ||
+                      draft.content ||
+                      "No content available"}
+                  </p>
+
+
+                  {/* DATE */}
+
+                  <p className="text-sm text-gray-500 mt-4">
+                    {draft.createdAt}
+                  </p>
+
+
+                  {/* BUTTONS */}
+
+                  <div className="flex gap-3 mt-6">
+
+
+                    {/* PUBLISH */}
+
+                    <button
+                      onClick={() =>
+                        handlePublish(draft)
+                      }
+                      className="flex-1 bg-sky-700 hover:bg-sky-600 text-white py-2 rounded-lg flex justify-center items-center gap-2"
+                    >
+
+                      <Send size={18} />
+
+                      Publish
+
+                    </button>
+
+
+                    {/* DELETE */}
+
+                    <button
+                      onClick={() =>
+                        handleDelete(
+                          draft._id
+                        )
+                      }
+                      className="bg-red-600 hover:bg-red-700 text-white p-3 rounded-lg"
+                    >
+
+                      <Trash2 size={18} />
+
+                    </button>
+
+                  </div>
 
                 </div>
 
               </div>
 
-            </div>
+            ))}
 
-          ))}
+          </div>
 
-        </div>
+        )}
 
-      )}
+      </main>
 
-    </main>
 
-    <Footer />
+      <Footer />
 
-  </div>
-);
+    </div>
+  );
 }
+
+
 export default Draft;

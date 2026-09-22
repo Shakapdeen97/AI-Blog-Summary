@@ -1,8 +1,6 @@
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-
 const User = require("../models/User");
-
 
 // ================= REGISTER =================
 
@@ -17,12 +15,12 @@ const register = async (req, res) => {
       });
     }
 
-    // Check existing user
+    // Check whether user already exists
     const existingUser = await User.findOne({ email });
 
     if (existingUser) {
       return res.status(409).json({
-        message: "User already exists with this email",
+        message: "User already exists",
       });
     }
 
@@ -46,6 +44,8 @@ const register = async (req, res) => {
     });
 
   } catch (error) {
+    console.error(error);
+
     res.status(500).json({
       message: "Registration failed",
       error: error.message,
@@ -67,7 +67,7 @@ const login = async (req, res) => {
       });
     }
 
-    // Find user
+    // Find user by email
     const user = await User.findOne({ email });
 
     if (!user) {
@@ -88,7 +88,7 @@ const login = async (req, res) => {
       });
     }
 
-    // Generate JWT
+    // Generate JWT token
     const token = jwt.sign(
       {
         id: user._id,
@@ -100,9 +100,12 @@ const login = async (req, res) => {
       }
     );
 
+    // Send response
     res.status(200).json({
       message: "Login successful",
+
       token,
+
       user: {
         id: user._id,
         name: user.name,
@@ -111,6 +114,8 @@ const login = async (req, res) => {
     });
 
   } catch (error) {
+    console.error(error);
+
     res.status(500).json({
       message: "Login failed",
       error: error.message,
@@ -118,6 +123,8 @@ const login = async (req, res) => {
   }
 };
 
+
+// ================= EXPORT =================
 
 module.exports = {
   register,

@@ -6,65 +6,67 @@ import {
   FileText,
   WandSparkles,
 } from "lucide-react";
+
 import api from "../services/api";
 
 function Login() {
   const navigate = useNavigate();
 
   const [email, setEmail] = useState("");
-
   const [password, setPassword] = useState("");
-  //
-  const handleLogin = async () => {
 
+  const handleLogin = async () => {
+    // Email validation
     if (!email.trim()) {
       alert("Please enter email");
       return;
     }
 
+    // Password validation
     if (!password.trim()) {
       alert("Please enter password");
       return;
     }
 
     try {
+      // Login API
+      const response = await api.post("/auth/login", {
+        email,
+        password,
+      });
 
-      const response = await api.get("/users");
+      // Save JWT token
+      localStorage.setItem("token", response.data.token);
 
-      const user = response.data.find(
-        (u) =>
-          u.email === email &&
-          u.password === password
-      );
-
-      if (!user) {
-        alert("Invalid Email or Password");
-        return;
-      }
-
-      // Save logged in user
+      // Save user details
       localStorage.setItem(
         "user",
-        JSON.stringify(user)
+        JSON.stringify(response.data.user)
       );
 
       alert("Login Successful");
 
+      // Go to dashboard
       navigate("/dashboard");
 
     } catch (error) {
-
       console.log(error);
 
-      alert("Login Failed");
-
+      if (error.response) {
+        alert(
+          error.response.data.message ||
+          "Invalid Email or Password"
+        );
+      } else {
+        alert("Unable to connect to server");
+      }
     }
-
   };
+
   return (
     <div className="min-h-screen grid lg:grid-cols-2">
 
-      {/* LEFT SIDE */}
+      {/* ================= LEFT SIDE ================= */}
 
       <div className="hidden lg:flex flex-col justify-center bg-gradient-to-br from-sky-950 via-sky-900 to-cyan-700 text-white px-16">
 
@@ -111,7 +113,8 @@ function Login() {
 
       </div>
 
-      {/* RIGHT SIDE */}
+
+      {/* ================= RIGHT SIDE ================= */}
 
       <div className="flex justify-center items-center bg-gray-100 px-6">
 
@@ -124,6 +127,7 @@ function Login() {
           <p className="text-center text-gray-500 mt-2">
             Login to your account
           </p>
+
 
           {/* Email */}
 
@@ -143,6 +147,7 @@ function Login() {
 
           </div>
 
+
           {/* Password */}
 
           <div className="mt-5">
@@ -160,6 +165,7 @@ function Login() {
             />
 
           </div>
+
 
           {/* Remember */}
 
@@ -179,7 +185,8 @@ function Login() {
 
           </div>
 
-          {/* Button */}
+
+          {/* Login Button */}
 
           <button
             onClick={handleLogin}
@@ -188,7 +195,8 @@ function Login() {
             Sign In
           </button>
 
-          {/* Bottom */}
+
+          {/* Register */}
 
           <p className="text-center mt-6">
 

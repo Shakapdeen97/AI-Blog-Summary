@@ -1,5 +1,9 @@
 import { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import {
+  useParams,
+  useNavigate,
+} from "react-router-dom";
+
 import {
   Calendar,
   User,
@@ -12,65 +16,129 @@ import api from "../services/api";
 import DashboardNavbar from "../components/DashboardNavbar";
 import Footer from "../components/Footer";
 
+
 function BlogDetails() {
+
   const { id } = useParams();
 
   const navigate = useNavigate();
 
   const [blog, setBlog] = useState(null);
 
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] =
+    useState(true);
+
+
+  // ================= LOAD BLOG =================
+
+const loadBlog = async () => {
+  try {
+    setLoading(true);
+
+    const response = await api.get(`/blogs/${id}`);
+
+    // Backend returns:
+    // { blog: {...} }
+
+    setBlog(response.data.blog);
+
+  } catch (error) {
+    console.log("Load Blog Error:", error);
+
+    setBlog(null);
+
+  } finally {
+    setLoading(false);
+  }
+};
+
+
+  // ================= PAGE LOAD =================
 
   useEffect(() => {
+
     loadBlog();
-  }, []);
 
-  const loadBlog = async () => {
-    try {
-      const response = await api.get(`/blogs/${id}`);
+  }, [id]);
 
-      setBlog(response.data);
-    } catch (error) {
-      console.log(error);
-    } finally {
-      setLoading(false);
-    }
-  };
+
+  // ================= LOADING =================
 
   if (loading) {
+
     return (
+
       <div className="min-h-screen flex items-center justify-center text-2xl font-bold">
+
         Loading...
+
       </div>
+
     );
   }
+
+
+  // ================= NOT FOUND =================
 
   if (!blog) {
+
     return (
-      <div className="min-h-screen flex items-center justify-center text-2xl font-bold">
-        Blog Not Found
-      </div>
-    );
-  }
 
-  return (
-    <div className="min-h-screen bg-gray-100">
+      <div className="min-h-screen flex flex-col items-center justify-center">
 
-      <DashboardNavbar />
+        <h1 className="text-2xl font-bold">
+          Blog Not Found
+        </h1>
 
-      <div className="max-w-5xl mx-auto py-10 px-4">
 
         <button
-          onClick={() => navigate("/dashboard")}
-          className="flex items-center gap-2 text-sky-900 font-semibold mb-6"
+          onClick={() =>
+            navigate("/dashboard")
+          }
+          className="mt-5 bg-sky-900 text-white px-6 py-3 rounded-lg"
         >
-          <ArrowLeft size={20} />
           Back to Dashboard
         </button>
 
+      </div>
+
+    );
+  }
+
+
+  return (
+
+    <div className="min-h-screen bg-gray-100">
+
+
+      <DashboardNavbar />
+
+
+      <div className="max-w-5xl mx-auto py-10 px-4">
+
+
+        {/* BACK BUTTON */}
+
+        <button
+          onClick={() =>
+            navigate("/dashboard")
+          }
+          className="flex items-center gap-2 text-sky-900 font-semibold mb-6"
+        >
+
+          <ArrowLeft size={20} />
+
+          Back to Dashboard
+
+        </button>
+
+
+        {/* BLOG CARD */}
+
         <div className="bg-white rounded-xl shadow-lg overflow-hidden">
 
-          {/* Blog Image */}
+
+          {/* IMAGE */}
 
           <img
             src={blog.image}
@@ -82,71 +150,104 @@ function BlogDetails() {
             }}
           />
 
+
           <div className="p-8">
 
-            {/* Tag */}
 
-            <span className="bg-sky-100 text-sky-700 px-4 py-1 rounded-full">
-              <Tag size={14} className="inline mr-2" />
-              {blog.tags}
+            {/* TAG */}
+
+            <span className="inline-flex items-center bg-sky-100 text-sky-700 px-4 py-1 rounded-full">
+
+              <Tag
+                size={14}
+                className="mr-2"
+              />
+
+              {blog.tags || "General"}
+
             </span>
 
-            {/* Title */}
+
+            {/* TITLE */}
 
             <h1 className="text-4xl font-bold mt-6">
               {blog.title}
             </h1>
 
-            {/* Author */}
 
-            <div className="flex gap-8 mt-5 text-gray-600">
+            {/* AUTHOR */}
+
+            <div className="flex flex-wrap gap-8 mt-5 text-gray-600">
+
 
               <div className="flex items-center gap-2">
+
                 <User size={18} />
+
                 {blog.author}
+
               </div>
 
+
               <div className="flex items-center gap-2">
+
                 <Calendar size={18} />
+
                 {blog.createdAt}
+
               </div>
 
             </div>
 
-            {/* AI Summary */}
+
+            {/* AI SUMMARY */}
 
             <div className="mt-10">
+
 
               <h2 className="text-2xl font-bold text-sky-900">
                 🤖 AI Generated Summary
               </h2>
 
+
               <div className="mt-4 bg-sky-50 border border-sky-200 rounded-xl p-6 whitespace-pre-line leading-8">
-                {blog.summary}
+
+                {blog.summary ||
+                  "No summary available."}
+
               </div>
 
             </div>
 
-            {/* Full Content */}
+
+            {/* FULL ARTICLE */}
 
             <div className="mt-10">
+
 
               <h2 className="text-2xl font-bold text-sky-900">
                 📄 Full Article
               </h2>
 
+
               <div className="mt-4 text-gray-700 leading-9 whitespace-pre-line text-lg">
+
                 {blog.content}
+
               </div>
 
             </div>
 
-            {/* Bottom Button */}
+
+            {/* BACK BUTTON */}
 
             <div className="mt-10">
 
+
               <button
-                onClick={() => navigate("/dashboard")}
+                onClick={() =>
+                  navigate("/dashboard")
+                }
                 className="bg-sky-900 hover:bg-sky-800 text-white px-6 py-3 rounded-lg"
               >
                 Back to Dashboard
@@ -160,10 +261,12 @@ function BlogDetails() {
 
       </div>
 
+
       <Footer />
 
     </div>
   );
 }
+
 
 export default BlogDetails;

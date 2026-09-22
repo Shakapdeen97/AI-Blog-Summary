@@ -6,10 +6,10 @@ import {
   FileText,
   WandSparkles,
 } from "lucide-react";
+
 import api from "../services/api";
 
 function Register() {
-
   const navigate = useNavigate();
 
   const [name, setName] = useState("");
@@ -18,93 +18,103 @@ function Register() {
   const [confirmPassword, setConfirmPassword] = useState("");
 
   const handleRegister = async () => {
-  // Name Validation
-  if (!name.trim()) {
-    alert("Please enter your name");
-    return;
-  }
 
-  // Email Validation
-  if (!email.trim()) {
-    alert("Please enter your email");
-    return;
-  }
+    // ================= NAME VALIDATION =================
 
-  const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-  if (!emailPattern.test(email)) {
-    alert("Please enter a valid email");
-    return;
-  }
-
-  // Password Validation
-  if (!password.trim()) {
-    alert("Please enter your password");
-    return;
-  }
-
-  if (password.length < 6) {
-    alert("Password must be at least 6 characters");
-    return;
-  }
-
-  // Confirm Password
-  if (!confirmPassword.trim()) {
-    alert("Please confirm your password");
-    return;
-  }
-
-  if (password !== confirmPassword) {
-    alert("Passwords do not match");
-    return;
-  }
-
-  try {
-
-    // Get all users
-    const response = await api.get("/users");
-
-    // Check duplicate email
-    const userExists = response.data.find(
-      (user) => user.email.toLowerCase() === email.toLowerCase()
-    );
-
-    if (userExists) {
-      alert("Email already registered");
+    if (!name.trim()) {
+      alert("Please enter your name");
       return;
     }
 
-    // Create New User
-    const newUser = {
-      name,
-      email,
-      password,
-    };
 
-    // Save User
-    await api.post("/users", newUser);
+    // ================= EMAIL VALIDATION =================
 
-    alert("Registration Successful");
+    if (!email.trim()) {
+      alert("Please enter your email");
+      return;
+    }
 
-    // Clear Form
-    setName("");
-    setEmail("");
-    setPassword("");
-    setConfirmPassword("");
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-    // Go Login Page
-    navigate("/login");
+    if (!emailPattern.test(email)) {
+      alert("Please enter a valid email");
+      return;
+    }
 
-  } catch (error) {
-    console.log(error);
-    alert("Something went wrong");
-  }
-};
+
+    // ================= PASSWORD VALIDATION =================
+
+    if (!password.trim()) {
+      alert("Please enter your password");
+      return;
+    }
+
+    if (password.length < 6) {
+      alert("Password must be at least 6 characters");
+      return;
+    }
+
+
+    // ================= CONFIRM PASSWORD =================
+
+    if (!confirmPassword.trim()) {
+      alert("Please confirm your password");
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      alert("Passwords do not match");
+      return;
+    }
+
+
+    // ================= REGISTER API =================
+
+    try {
+
+      const response = await api.post("/auth/register", {
+        name,
+        email,
+        password,
+      });
+
+      console.log(response.data);
+
+      alert("Registration Successful");
+
+
+      // Clear form
+
+      setName("");
+      setEmail("");
+      setPassword("");
+      setConfirmPassword("");
+
+
+      // Go to Login
+
+      navigate("/login");
+
+    } catch (error) {
+
+      console.log(error);
+
+      if (error.response) {
+        alert(
+          error.response.data.message ||
+          "Registration Failed"
+        );
+      } else {
+        alert("Unable to connect to server");
+      }
+    }
+  };
+
 
   return (
     <div className="min-h-screen grid lg:grid-cols-2">
 
-      {/* LEFT SIDE */}
+      {/* ================= LEFT SIDE ================= */}
 
       <div className="hidden lg:flex flex-col justify-center bg-gradient-to-br from-sky-950 via-sky-900 to-cyan-700 text-white px-16">
 
@@ -120,14 +130,17 @@ function Register() {
 
         </div>
 
+
         <h2 className="text-5xl font-bold leading-tight">
           Create Your Account
         </h2>
+
 
         <p className="mt-6 text-lg text-gray-200 leading-8">
           Join SummarAI and start creating blogs with
           AI-powered text summarization.
         </p>
+
 
         <div className="mt-10 space-y-6">
 
@@ -136,10 +149,12 @@ function Register() {
             <span>AI Text Summarization</span>
           </div>
 
+
           <div className="flex items-center gap-4">
             <FileText />
             <span>Create & Manage Blogs</span>
           </div>
+
 
           <div className="flex items-center gap-4">
             <ShieldCheck />
@@ -150,7 +165,8 @@ function Register() {
 
       </div>
 
-      {/* RIGHT SIDE */}
+
+      {/* ================= RIGHT SIDE ================= */}
 
       <div className="flex justify-center items-center bg-gray-100 px-6">
 
@@ -160,14 +176,19 @@ function Register() {
             Create Account
           </h1>
 
+
           <p className="text-center text-gray-500 mt-2">
             Register to continue
           </p>
 
-          {/* Name */}
+
+          {/* ================= NAME ================= */}
 
           <div className="mt-6">
-            <label className="font-medium">Full Name</label>
+
+            <label className="font-medium">
+              Full Name
+            </label>
 
             <input
               type="text"
@@ -176,12 +197,17 @@ function Register() {
               onChange={(e) => setName(e.target.value)}
               className="w-full border rounded-lg p-3 mt-2 outline-none focus:ring-2 focus:ring-sky-600"
             />
+
           </div>
 
-          {/* Email */}
+
+          {/* ================= EMAIL ================= */}
 
           <div className="mt-4">
-            <label className="font-medium">Email</label>
+
+            <label className="font-medium">
+              Email
+            </label>
 
             <input
               type="email"
@@ -190,12 +216,17 @@ function Register() {
               onChange={(e) => setEmail(e.target.value)}
               className="w-full border rounded-lg p-3 mt-2 outline-none focus:ring-2 focus:ring-sky-600"
             />
+
           </div>
 
-          {/* Password */}
+
+          {/* ================= PASSWORD ================= */}
 
           <div className="mt-4">
-            <label className="font-medium">Password</label>
+
+            <label className="font-medium">
+              Password
+            </label>
 
             <input
               type="password"
@@ -204,12 +235,17 @@ function Register() {
               onChange={(e) => setPassword(e.target.value)}
               className="w-full border rounded-lg p-3 mt-2 outline-none focus:ring-2 focus:ring-sky-600"
             />
+
           </div>
 
-          {/* Confirm Password */}
+
+          {/* ================= CONFIRM PASSWORD ================= */}
 
           <div className="mt-4">
-            <label className="font-medium">Confirm Password</label>
+
+            <label className="font-medium">
+              Confirm Password
+            </label>
 
             <input
               type="password"
@@ -218,9 +254,11 @@ function Register() {
               onChange={(e) => setConfirmPassword(e.target.value)}
               className="w-full border rounded-lg p-3 mt-2 outline-none focus:ring-2 focus:ring-sky-600"
             />
+
           </div>
 
-          {/* Button */}
+
+          {/* ================= BUTTON ================= */}
 
           <button
             onClick={handleRegister}
@@ -229,9 +267,11 @@ function Register() {
             Create Account
           </button>
 
-          {/* Bottom */}
+
+          {/* ================= LOGIN ================= */}
 
           <p className="text-center mt-6">
+
             Already have an account?
 
             <Link
@@ -240,6 +280,7 @@ function Register() {
             >
               Sign In
             </Link>
+
           </p>
 
         </div>

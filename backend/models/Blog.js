@@ -18,12 +18,12 @@ const blogSchema = new mongoose.Schema(
       default: "",
     },
 
-    tags: {
+    image: {
       type: String,
       default: "",
     },
 
-    image: {
+    tags: {
       type: String,
       default: "",
     },

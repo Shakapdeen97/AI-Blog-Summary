@@ -9,6 +9,7 @@ import Draft from "./pages/Draft";
 import BlogDetails from "./pages/BlogDetails";
 import ProtectedRoute from "./components/ProtectedRoute";
 
+
 function App() {
   return (
     <Routes>
